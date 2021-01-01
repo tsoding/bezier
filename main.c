@@ -5,6 +5,10 @@
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
+#define SCREEN_FPS 60
+#define DELTA_TIME_SEC (1.0f / SCREEN_FPS)
+#define DELTA_TIME_MS ((Uint32) floorf(DELTA_TIME_SEC * 1000.0f))
+#define MARKER_SIZE 15.0f
 #define BACKGROUND_COLOR 0x353535FF
 #define LINE_COLOR 0xDA2C38FF
 #define RECT_COLOR 0x87C38FFF
@@ -35,6 +39,7 @@ void *check_sdl_ptr(void *ptr)
     return ptr;
 }
 
+
 typedef struct {
     float x;
     float y;
@@ -43,6 +48,31 @@ typedef struct {
 Vec2 vec2(float x, float y)
 {
     return (Vec2){x, y};
+}
+
+Vec2 vec2_sub(Vec2 a, Vec2 b)
+{
+    return vec2(a.x - b.x, a.y - b.y);
+}
+
+Vec2 vec2_scale(Vec2 a, float s)
+{
+    return vec2(a.x * s, a.y * s);
+}
+
+Vec2 vec2_add(Vec2 a, Vec2 b)
+{
+    return vec2(a.x + b.x, a.y + b.y);
+}
+
+float lerpf(float a, float b, float p)
+{
+    return a + (b - a) * p;
+}
+
+Vec2 lerpv2(Vec2 a, Vec2 b, float p)
+{
+    return vec2_add(a, vec2_scale(vec2_sub(b, a), p));
 }
 
 void render_line(SDL_Renderer *renderer,
@@ -76,6 +106,21 @@ void fill_rect(SDL_Renderer *renderer, Vec2 pos, Vec2 size, uint32_t color)
     check_sdl_code(SDL_RenderFillRect(renderer, &rect));
 }
 
+void render_marker(SDL_Renderer *renderer, Vec2 pos, uint32_t color)
+{
+    const Vec2 size = vec2(MARKER_SIZE, MARKER_SIZE);
+    fill_rect(
+        renderer,
+        vec2_sub(pos, vec2_scale(size, 0.5f)),
+        size,
+        color);
+}
+
+#define PS_CAPACITY 256
+
+Vec2 ps[PS_CAPACITY];
+size_t ps_count = 0;
+
 int main(void)
 {
     check_sdl_code(
@@ -99,6 +144,7 @@ int main(void)
         SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT));
 
     int quit = 0;
+    float t = 0.0f;
     while (!quit) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -106,6 +152,16 @@ int main(void)
             case SDL_QUIT:
                 quit = 1;
                 break;
+
+            case SDL_MOUSEBUTTONDOWN: {
+                switch (event.button.button) {
+                case SDL_BUTTON_LEFT: {
+                    ps[ps_count++] =
+                        vec2(event.button.x,
+                             event.button.y);
+                } break;
+                }
+            } break;
             }
         }
 
@@ -117,20 +173,22 @@ int main(void)
         check_sdl_code(
             SDL_RenderClear(renderer));
 
-        render_line(
-            renderer,
-            vec2(0.0f, 0.0f),
-            vec2(SCREEN_WIDTH, SCREEN_HEIGHT),
-            LINE_COLOR);
-        render_line(
-            renderer,
-            vec2(SCREEN_WIDTH, 0.0f),
-            vec2(0.0f, SCREEN_HEIGHT),
-            LINE_COLOR);
 
-        fill_rect(renderer, vec2(0.0f, 0.0f), vec2(100.0f, 100.0f), RECT_COLOR);
+        for (size_t i = 0; i < ps_count; ++i) {
+            render_marker(renderer, ps[i], LINE_COLOR);
+        }
+
+        for (size_t i = 0; ps_count > 0 && i < ps_count - 1; ++i) {
+            render_marker(
+                renderer,
+                lerpv2(ps[i], ps[i + 1], (sinf(t) + 1.0f) * 0.5f),
+                RECT_COLOR);
+        }
 
         SDL_RenderPresent(renderer);
+
+        SDL_Delay(DELTA_TIME_MS);
+        t += DELTA_TIME_SEC;
     }
 
     SDL_Quit();
