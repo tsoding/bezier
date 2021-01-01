@@ -192,7 +192,9 @@ int main(void)
         SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT));
 
     int quit = 0;
+    int markers = 1;
     float t = 0.0f;
+    float bezier_sample_step = 0.05f;
     while (!quit) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -200,6 +202,14 @@ int main(void)
             case SDL_QUIT:
                 quit = 1;
                 break;
+
+            case SDL_KEYDOWN: {
+                switch (event.key.keysym.sym) {
+                case SDLK_F1: {
+                    markers = !markers;
+                } break;
+                }
+            } break;
 
             case SDL_MOUSEBUTTONDOWN: {
                 switch (event.button.button) {
@@ -226,6 +236,14 @@ int main(void)
                     ps[ps_selected] = mouse_pos;
                 }
             } break;
+
+            case SDL_MOUSEWHEEL: {
+                if (event.wheel.y > 0) {
+                    bezier_sample_step = fminf(bezier_sample_step + 0.001f, 0.999f);
+                } else if (event.wheel.y < 0) {
+                    bezier_sample_step = fmaxf(bezier_sample_step - 0.001f, 0.001f);
+                }
+            } break;
             }
         }
 
@@ -237,21 +255,29 @@ int main(void)
         check_sdl_code(
             SDL_RenderClear(renderer));
 
+        if (ps_count >= 4) {
+            if (markers) {
+                render_bezier_markers(
+                    renderer,
+                    ps[0], ps[1], ps[2], ps[3],
+                    bezier_sample_step,
+                    GREEN_COLOR);
+            } else {
+                render_bezier_curve(
+                    renderer,
+                    ps[0], ps[1], ps[2], ps[3],
+                    bezier_sample_step,
+                    GREEN_COLOR);
+            }
+
+            render_line(renderer, ps[0], ps[1], RED_COLOR);
+            render_line(renderer, ps[2], ps[3], RED_COLOR);
+        }
+
         for (size_t i = 0; i < ps_count; ++i) {
             render_marker(renderer, ps[i], RED_COLOR);
         }
 
-        if (ps_count >= 4) {
-            render_line(renderer, ps[0], ps[1], RED_COLOR);
-            render_line(renderer, ps[2], ps[3], RED_COLOR);
-
-            // TODO: switch between markers and lines at runtime
-            render_bezier_markers(
-                renderer,
-                ps[0], ps[1], ps[2], ps[3],
-                0.01f,
-                GREEN_COLOR);
-        }
 
         SDL_RenderPresent(renderer);
 
