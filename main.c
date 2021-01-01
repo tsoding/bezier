@@ -224,6 +224,9 @@ int main(void)
         }
 
         if (ps_count >= 4) {
+            render_line(renderer, ps[0], ps[1], RED_COLOR);
+            render_line(renderer, ps[2], ps[3], RED_COLOR);
+
             render_bezier_markers(
                 renderer,
                 ps[0], ps[1], ps[2], ps[3],
