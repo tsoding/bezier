@@ -10,8 +10,9 @@
 #define DELTA_TIME_MS ((Uint32) floorf(DELTA_TIME_SEC * 1000.0f))
 #define MARKER_SIZE 15.0f
 #define BACKGROUND_COLOR 0x353535FF
-#define LINE_COLOR 0xDA2C38FF
-#define RECT_COLOR 0x87C38FFF
+#define RED_COLOR 0xDA2C38FF
+#define GREEN_COLOR 0x87C38FFF
+#define BLUE_COLOR 0x748CABFF
 
 #define HEX_COLOR(hex)                      \
     ((hex) >> (3 * 8)) & 0xFF,              \
@@ -38,7 +39,6 @@ void *check_sdl_ptr(void *ptr)
 
     return ptr;
 }
-
 
 typedef struct {
     float x;
@@ -116,6 +116,21 @@ void render_marker(SDL_Renderer *renderer, Vec2 pos, uint32_t color)
         color);
 }
 
+void render_bezier_markers(SDL_Renderer *renderer,
+                           Vec2 a, Vec2 b, Vec2 c, Vec2 d,
+                           float s, uint32_t color)
+{
+    for (float p = 0.0f; p <= 1.0f; p += s) {
+        Vec2 ab = lerpv2(a, b, p);
+        Vec2 bc = lerpv2(b, c, p);
+        Vec2 cd = lerpv2(c, d, p);
+        Vec2 abc = lerpv2(ab, bc, p);
+        Vec2 bcd = lerpv2(bc, cd, p);
+        Vec2 abcd = lerpv2(abc, bcd, p);
+        render_marker(renderer, abcd, color);
+    }
+}
+
 #define PS_CAPACITY 256
 
 Vec2 ps[PS_CAPACITY];
@@ -173,16 +188,16 @@ int main(void)
         check_sdl_code(
             SDL_RenderClear(renderer));
 
-
         for (size_t i = 0; i < ps_count; ++i) {
-            render_marker(renderer, ps[i], LINE_COLOR);
+            render_marker(renderer, ps[i], RED_COLOR);
         }
 
-        for (size_t i = 0; ps_count > 0 && i < ps_count - 1; ++i) {
-            render_marker(
+        if (ps_count >= 4) {
+            render_bezier_markers(
                 renderer,
-                lerpv2(ps[i], ps[i + 1], (sinf(t) + 1.0f) * 0.5f),
-                RECT_COLOR);
+                ps[0], ps[1], ps[2], ps[3],
+                0.05f,
+                GREEN_COLOR);
         }
 
         SDL_RenderPresent(renderer);
