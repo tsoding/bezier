@@ -116,18 +116,36 @@ void render_marker(SDL_Renderer *renderer, Vec2 pos, uint32_t color)
         color);
 }
 
+// TODO: explore how to render bezier curves on GPU using fragment shaders
+// TODO: make bezier_sample to work with arbitrary amount of pointsa
+Vec2 bezier_sample(Vec2 a, Vec2 b, Vec2 c, Vec2 d, float p)
+{
+    const Vec2 ab = lerpv2(a, b, p);
+    const Vec2 bc = lerpv2(b, c, p);
+    const Vec2 cd = lerpv2(c, d, p);
+    const Vec2 abc = lerpv2(ab, bc, p);
+    const Vec2 bcd = lerpv2(bc, cd, p);
+    const Vec2 abcd = lerpv2(abc, bcd, p);
+    return abcd;
+}
+
 void render_bezier_markers(SDL_Renderer *renderer,
                            Vec2 a, Vec2 b, Vec2 c, Vec2 d,
                            float s, uint32_t color)
 {
     for (float p = 0.0f; p <= 1.0f; p += s) {
-        const Vec2 ab = lerpv2(a, b, p);
-        const Vec2 bc = lerpv2(b, c, p);
-        const Vec2 cd = lerpv2(c, d, p);
-        const Vec2 abc = lerpv2(ab, bc, p);
-        const Vec2 bcd = lerpv2(bc, cd, p);
-        const Vec2 abcd = lerpv2(abc, bcd, p);
-        render_marker(renderer, abcd, color);
+        render_marker(renderer, bezier_sample(a, b, c, d, p), color);
+    }
+}
+
+void render_bezier_curve(SDL_Renderer *renderer,
+                         Vec2 a, Vec2 b, Vec2 c, Vec2 d,
+                         float s, uint32_t color)
+{
+    for (float p = 0.0f; p <= 1.0f; p += s) {
+        Vec2 begin = bezier_sample(a, b, c, d, p);
+        Vec2 end = bezier_sample(a, b, c, d, p + s);
+        render_line(renderer, begin, end, color);
     }
 }
 
@@ -227,10 +245,11 @@ int main(void)
             render_line(renderer, ps[0], ps[1], RED_COLOR);
             render_line(renderer, ps[2], ps[3], RED_COLOR);
 
+            // TODO: switch between markers and lines at runtime
             render_bezier_markers(
                 renderer,
                 ps[0], ps[1], ps[2], ps[3],
-                0.05f,
+                0.01f,
                 GREEN_COLOR);
         }
 
