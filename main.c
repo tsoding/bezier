@@ -121,12 +121,12 @@ void render_bezier_markers(SDL_Renderer *renderer,
                            float s, uint32_t color)
 {
     for (float p = 0.0f; p <= 1.0f; p += s) {
-        Vec2 ab = lerpv2(a, b, p);
-        Vec2 bc = lerpv2(b, c, p);
-        Vec2 cd = lerpv2(c, d, p);
-        Vec2 abc = lerpv2(ab, bc, p);
-        Vec2 bcd = lerpv2(bc, cd, p);
-        Vec2 abcd = lerpv2(abc, bcd, p);
+        const Vec2 ab = lerpv2(a, b, p);
+        const Vec2 bc = lerpv2(b, c, p);
+        const Vec2 cd = lerpv2(c, d, p);
+        const Vec2 abc = lerpv2(ab, bc, p);
+        const Vec2 bcd = lerpv2(bc, cd, p);
+        const Vec2 abcd = lerpv2(abc, bcd, p);
         render_marker(renderer, abcd, color);
     }
 }
@@ -135,6 +135,21 @@ void render_bezier_markers(SDL_Renderer *renderer,
 
 Vec2 ps[PS_CAPACITY];
 size_t ps_count = 0;
+int ps_selected = -1;
+
+int ps_at(Vec2 pos)
+{
+    const Vec2 ps_size = vec2(MARKER_SIZE, MARKER_SIZE);
+    for (size_t i = 0; i < ps_count; ++i) {
+        const Vec2 ps_begin = vec2_sub(ps[i], vec2_scale(ps_size, 0.5f));
+        const Vec2 ps_end = vec2_add(ps_begin, ps_size);
+        if (ps_begin.x <= pos.x && pos.x <= ps_end.x &&
+            ps_begin.y <= pos.y && pos.y <= ps_end.y) {
+            return (int) i;
+        }
+    }
+    return -1;
+}
 
 int main(void)
 {
@@ -171,10 +186,26 @@ int main(void)
             case SDL_MOUSEBUTTONDOWN: {
                 switch (event.button.button) {
                 case SDL_BUTTON_LEFT: {
-                    ps[ps_count++] =
-                        vec2(event.button.x,
-                             event.button.y);
+                    const Vec2 mouse_pos = vec2(event.button.x, event.button.y);
+                    if (ps_count < 4) {
+                        ps[ps_count++] = mouse_pos;
+                    } else {
+                        ps_selected = ps_at(mouse_pos);
+                    }
                 } break;
+                }
+            } break;
+
+            case SDL_MOUSEBUTTONUP: {
+                if (event.button.button == SDL_BUTTON_LEFT) {
+                    ps_selected = -1;
+                }
+            } break;
+
+            case SDL_MOUSEMOTION: {
+                Vec2 mouse_pos = vec2(event.motion.x, event.motion.y);
+                if (ps_selected >= 0) {
+                    ps[ps_selected] = mouse_pos;
                 }
             } break;
             }
