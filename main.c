@@ -116,35 +116,37 @@ void render_marker(SDL_Renderer *renderer, Vec2 pos, uint32_t color)
         color);
 }
 
-// TODO: explore how to render bezier curves on GPU using fragment shaders
-// TODO: make bezier_sample to work with arbitrary amount of pointsa
-Vec2 bezier_sample(Vec2 a, Vec2 b, Vec2 c, Vec2 d, float p)
+Vec2 beziern_sample(Vec2 *ps, Vec2 *xs, size_t n, float p)
 {
-    const Vec2 ab = lerpv2(a, b, p);
-    const Vec2 bc = lerpv2(b, c, p);
-    const Vec2 cd = lerpv2(c, d, p);
-    const Vec2 abc = lerpv2(ab, bc, p);
-    const Vec2 bcd = lerpv2(bc, cd, p);
-    const Vec2 abcd = lerpv2(abc, bcd, p);
-    return abcd;
+    memcpy(xs, ps, sizeof(Vec2) * n);
+
+    while (n > 1) {
+        for (size_t i = 0; i < n - 1; ++i) {
+            xs[i] = lerpv2(xs[i], xs[i + 1], p);
+        }
+        n -= 1;
+    }
+
+    return xs[0];
 }
 
+// TODO: explore how to render bezier curves on GPU using fragment shaders
 void render_bezier_markers(SDL_Renderer *renderer,
-                           Vec2 a, Vec2 b, Vec2 c, Vec2 d,
+                           Vec2 *ps, Vec2 *xs, size_t n,
                            float s, uint32_t color)
 {
     for (float p = 0.0f; p <= 1.0f; p += s) {
-        render_marker(renderer, bezier_sample(a, b, c, d, p), color);
+        render_marker(renderer, beziern_sample(ps, xs, n, p), color);
     }
 }
 
 void render_bezier_curve(SDL_Renderer *renderer,
-                         Vec2 a, Vec2 b, Vec2 c, Vec2 d,
+                         Vec2 *ps, Vec2 *xs, size_t n,
                          float s, uint32_t color)
 {
     for (float p = 0.0f; p <= 1.0f; p += s) {
-        Vec2 begin = bezier_sample(a, b, c, d, p);
-        Vec2 end = bezier_sample(a, b, c, d, p + s);
+        Vec2 begin = beziern_sample(ps, xs, n, p);
+        Vec2 end = beziern_sample(ps, xs, n, p + s);
         render_line(renderer, begin, end, color);
     }
 }
@@ -152,6 +154,7 @@ void render_bezier_curve(SDL_Renderer *renderer,
 #define PS_CAPACITY 256
 
 Vec2 ps[PS_CAPACITY];
+Vec2 xs[PS_CAPACITY];
 size_t ps_count = 0;
 int ps_selected = -1;
 
@@ -215,10 +218,10 @@ int main(void)
                 switch (event.button.button) {
                 case SDL_BUTTON_LEFT: {
                     const Vec2 mouse_pos = vec2(event.button.x, event.button.y);
-                    if (ps_count < 4) {
+                    ps_selected = ps_at(mouse_pos);
+
+                    if (ps_selected < 0 && ps_count < PS_CAPACITY) {
                         ps[ps_count++] = mouse_pos;
-                    } else {
-                        ps_selected = ps_at(mouse_pos);
                     }
                 } break;
                 }
@@ -255,29 +258,28 @@ int main(void)
         check_sdl_code(
             SDL_RenderClear(renderer));
 
-        if (ps_count >= 4) {
+        if (ps_count >= 1) {
             if (markers) {
                 render_bezier_markers(
                     renderer,
-                    ps[0], ps[1], ps[2], ps[3],
+                    ps, xs, ps_count,
                     bezier_sample_step,
                     GREEN_COLOR);
             } else {
                 render_bezier_curve(
                     renderer,
-                    ps[0], ps[1], ps[2], ps[3],
+                    ps, xs, ps_count,
                     bezier_sample_step,
                     GREEN_COLOR);
             }
-
-            render_line(renderer, ps[0], ps[1], RED_COLOR);
-            render_line(renderer, ps[2], ps[3], RED_COLOR);
         }
 
         for (size_t i = 0; i < ps_count; ++i) {
             render_marker(renderer, ps[i], RED_COLOR);
+            if (i < ps_count - 1) {
+                render_line(renderer, ps[i], ps[i + 1], RED_COLOR);
+            }
         }
-
 
         SDL_RenderPresent(renderer);
 
