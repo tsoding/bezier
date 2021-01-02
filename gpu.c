@@ -46,7 +46,7 @@ GLuint link_program(GLuint vert_shader, GLuint frag_shader)
     return program;
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
     check_sdl_code(
         SDL_Init(SDL_INIT_VIDEO));
