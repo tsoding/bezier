@@ -62,6 +62,9 @@ int main(void)
 
     /*SDL_GLContext context = */SDL_GL_CreateContext(window);
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     GLuint vert_shader = compile_shader_file("./gpu.vert", GL_VERTEX_SHADER);
     GLuint frag_shader = compile_shader_file("./gpu.frag", GL_FRAGMENT_SHADER);
     GLuint program = link_program(vert_shader, frag_shader);

@@ -1,7 +1,7 @@
 #version 130
 
 #define MARKER_COLOR vec4(0.75, 0.0, 0.0, 1.0)
-#define BEZIER_CURVE_COLOR vec4(0.0, 0.75, 0.0, 1.0)
+#define BEZIER_CURVE_COLOR vec3(0.0, 0.75, 0.0)
 
 // TODO: at some combinations of p1, p2, p3 nothing is drawn
 uniform vec2 p1;
@@ -34,7 +34,16 @@ void main()
             if ((0.0f <= t1 && t1 <= 1.0f && abs(p0.y - y1) < bezier_curve_threshold) ||
                 (0.0f <= t2 && t2 <= 1.0f && abs(p0.y - y2) < bezier_curve_threshold))
             {
-                gl_FragColor = BEZIER_CURVE_COLOR;
+                float r1 = abs(p0.y - y1) / bezier_curve_threshold;
+                float r2 = abs(p0.y - y2) / bezier_curve_threshold;
+
+                if (0.0 <= r1 && r1 <= 1.0) {
+                    gl_FragColor = vec4(0.0, 0.75, 0.0, mix(1.0, 0.0, r1));
+                }
+
+                if (0.0 <= r2 && r2 <= 1.0) {
+                    gl_FragColor = vec4(0.0, 0.75, 0.0, mix(1.0, 0.0, r2));
+                }
             }
             else
             {
