@@ -2,5 +2,10 @@ PKGS=sdl2 gl
 CFLAGS=-Wall -Wextra -std=c11 -pedantic `pkg-config --cflags $(PKGS)`
 LIBS=`pkg-config --libs $(PKGS)` -lm
 
-bezier: main.c
-	$(CC) $(CFLAGS) -o bezier main.c $(LIBS)
+all: cpu gpu
+
+cpu: cpu.c
+	$(CC) $(CFLAGS) -o cpu cpu.c $(LIBS)
+
+gpu: gpu.c
+	$(CC) $(CFLAGS) -o gpu gpu.c $(LIBS)
