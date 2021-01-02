@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <errno.h>
 
+#include <epoxy/gl.h>
 #include <SDL.h>
 #define GL_GLEXT_PROTOTYPES
 #include <SDL_opengl.h>
