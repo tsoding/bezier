@@ -1,5 +1,6 @@
-CFLAGS=-Wall -Wextra -std=c11 -pedantic `pkg-config --cflags sdl2`
-LIBS=`pkg-config --libs sdl2` -lm
+PKGS=sdl2 gl
+CFLAGS=-Wall -Wextra -std=c11 -pedantic `pkg-config --cflags $(PKGS)`
+LIBS=`pkg-config --libs $(PKGS)` -lm
 
 bezier: main.c
 	$(CC) $(CFLAGS) -o bezier main.c $(LIBS)
