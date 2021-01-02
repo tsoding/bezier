@@ -1,15 +1,21 @@
 # Bézier Curve
 
-![thumbnail-cpu](./thumbnail-cpu.png)
-![thumbnail-gpu](./thumbnail-gpu.png)
-
 Just a fun little project to learn how to render Bézier Curves.
+
+## CPU implementation
+
+![thumbnail-cpu](./thumbnail-cpu.png)
+
+## GPU implementation
+
+![thumbnail-gpu](./thumbnail-gpu.png)
 
 ## Quick Start
 
 ```console
 $ make
-$ ./bezier
+$ ./cpu
+$ ./gpu
 ```
 
 ## References
