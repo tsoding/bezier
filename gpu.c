@@ -46,6 +46,8 @@ GLuint link_program(GLuint vert_shader, GLuint frag_shader)
     return program;
 }
 
+int w =SCREEN_WIDTH;
+int h =SCREEN_HEIGHT;
 int main(int argc, char *argv[])
 {
     check_sdl_code(
@@ -55,9 +57,9 @@ int main(int argc, char *argv[])
         check_sdl_ptr(
             SDL_CreateWindow(
                 "Bezier Curves",
-                0, 0,
-                SCREEN_WIDTH,
-                SCREEN_HEIGHT,
+                20, 20,
+                w,
+                h,
                 SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL));
 
     /*SDL_GLContext context = */SDL_GL_CreateContext(window);
@@ -94,9 +96,8 @@ int main(int argc, char *argv[])
             case SDL_MOUSEBUTTONDOWN: {
                 const Vec2 mouse_pos = vec2(
                     event.button.x,
-                    SCREEN_HEIGHT - event.button.y);
+                    h - event.button.y);
                 if (event.button.button == SDL_BUTTON_LEFT) {
-                    // TODO: dragging does not work if the window size is not correct
                     if (vec2_length(vec2_sub(p1, mouse_pos)) < MARKER_SIZE) {
                         p_selected = &p1;
                     }
@@ -120,7 +121,7 @@ int main(int argc, char *argv[])
             case SDL_MOUSEMOTION: {
                 const Vec2 mouse_pos = vec2(
                     event.button.x,
-                    SCREEN_HEIGHT - event.button.y);
+                    h - event.button.y);
                 if (p_selected) {
                     *p_selected = mouse_pos;
                 }
@@ -137,7 +138,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        glViewport(0, 0, w, h);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -149,6 +150,7 @@ int main(int argc, char *argv[])
         glDrawArrays(GL_QUADS, 0, 4);
 
         SDL_GL_SwapWindow(window);
+        SDL_GetWindowSize(window,&w,&h);
     }
 
 
