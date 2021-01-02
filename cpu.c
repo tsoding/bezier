@@ -96,7 +96,7 @@ int ps_at(Vec2 pos)
     return -1;
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
     check_sdl_code(
         SDL_Init(SDL_INIT_VIDEO));
