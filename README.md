@@ -10,6 +10,8 @@ Just a fun little project to learn how to render Bézier Curves.
 
 ![thumbnail-gpu](./thumbnail-gpu.png)
 
+<!-- TODO: add links to the screencasts -->
+
 ## Quick Start
 
 ```console

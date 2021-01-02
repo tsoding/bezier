@@ -21,6 +21,7 @@ void main()
     }
     else
     {
+        // TODO: document this method of rendering in a LaTeX document
         vec2 p0 = gl_FragCoord.xy;
         float a = p3.x - 2 * p2.x + p1.x;
         float b = 2 * (p2.x - p1.x);
