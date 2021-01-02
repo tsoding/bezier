@@ -4,6 +4,7 @@
 #define BEZIER_CURVE_COLOR vec3(0.0, 0.75, 0.0)
 
 // TODO: at some combinations of p1, p2, p3 nothing is drawn
+// TODO: explore math for 4 control points
 uniform vec2 p1;
 uniform vec2 p2;
 uniform vec2 p3;
