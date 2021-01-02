@@ -55,7 +55,6 @@ Vec2 beziern_sample(Vec2 *ps, Vec2 *xs, size_t n, float p)
     return xs[0];
 }
 
-// TODO: explore how to render bezier curves on GPU using fragment shaders
 void render_bezier_markers(SDL_Renderer *renderer,
                            Vec2 *ps, Vec2 *xs, size_t n,
                            float s, uint32_t color)

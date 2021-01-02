@@ -71,11 +71,13 @@ int main(void)
     GLint u_p2 = glGetUniformLocation(program, "p2");
     GLint u_p3 = glGetUniformLocation(program, "p3");
     GLint u_marker_radius = glGetUniformLocation(program, "marker_radius");
+    GLint u_bezier_curve_threshold = glGetUniformLocation(program, "bezier_curve_threshold");
 
     Vec2 p1 = vec2(100.0f, 100.0f);
     Vec2 p2 = vec2(200.0f, 200.0f);
     Vec2 p3 = vec2(300.0f, 300.0f);
     Vec2 *p_selected = NULL;
+    float bezier_curve_threshold = 10.0f;
 
     int quit = 0;
     while (!quit) {
@@ -91,6 +93,7 @@ int main(void)
                     event.button.x,
                     SCREEN_HEIGHT - event.button.y);
                 if (event.button.button == SDL_BUTTON_LEFT) {
+                    // TODO: dragging does not work if the window size is not correct
                     if (vec2_length(vec2_sub(p1, mouse_pos)) < MARKER_SIZE) {
                         p_selected = &p1;
                     }
@@ -119,6 +122,15 @@ int main(void)
                     *p_selected = mouse_pos;
                 }
             } break;
+
+            case SDL_MOUSEWHEEL: {
+#define BEZIER_CURVE_THRESHOLD_STEP 5.0f
+                if (event.wheel.y > 0) {
+                    bezier_curve_threshold = bezier_curve_threshold + BEZIER_CURVE_THRESHOLD_STEP;
+                } else if (event.wheel.y < 0) {
+                    bezier_curve_threshold = fmaxf(bezier_curve_threshold - BEZIER_CURVE_THRESHOLD_STEP, 0.0f);
+                }
+            } break;
             }
         }
 
@@ -130,6 +142,7 @@ int main(void)
         glUniform2f(u_p2, p2.x, p2.y);
         glUniform2f(u_p3, p3.x, p3.y);
         glUniform1f(u_marker_radius, MARKER_SIZE);
+        glUniform1f(u_bezier_curve_threshold, bezier_curve_threshold);
         glDrawArrays(GL_QUADS, 0, 4);
 
         SDL_GL_SwapWindow(window);
