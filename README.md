@@ -10,7 +10,10 @@ Just a fun little project to learn how to render Bézier Curves.
 
 ![thumbnail-gpu](./thumbnail-gpu.png)
 
-<!-- TODO: add links to the screencasts -->
+## Screencasts
+
+| [![thumbnail](http://i3.ytimg.com/vi/2oKzBq43ShE/hqdefault.jpg)](https://www.youtube.com/watch?v=2oKzBq43ShE&list=PLpM-Dvs8t0VY5sYK_mm1k9dZw5tFWgg4L) | Coding Bézier Curves — Day 1 |
+| [![thumbnail](http://i3.ytimg.com/vi/m4gVWZ_OkG4/hqdefault.jpg)](https://www.youtube.com/watch?v=m4gVWZ_OkG4&list=PLpM-Dvs8t0VY5sYK_mm1k9dZw5tFWgg4L) | Bézier Curves using OpenGL Fragment Shader — Day 2 | 
 
 ## Quick Start
 
